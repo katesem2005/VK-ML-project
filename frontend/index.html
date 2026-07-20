@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VK Улучшение изображений</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>VK: Улучшение изображений</h1>
+        <p>Загрузите изображение, и ИИ улучшит его яркость, контрастность и цветность</p>
+
+        <input type="file" id="uploadInput" accept="image/*">
+
+        <div class="image-container">
+            <div>
+                <p>Было (оригинал)</p>
+                <img id="originalImage" src="#" alt="Исходное изображение">
+            </div>
+            <div>
+                <p>Стало (улучшенное)</p>
+                <img id="enhancedImage" src="#" alt="Улучшенное изображение">
+            </div>
+        </div>
+
+        <div class="progress-area">
+            <progress id="progressBar" value="0" max="100"></progress>
+            <span id="progressText">0%</span>
+        </div>
+
+        <div class="buttons">
+            <button id="cancelBtn" disabled>Отменить</button>
+            <button id="downloadBtn" disabled>Скачать результат</button>
+            <button id="statusBtn">Проверить статус</button>
+        </div>
+
+        <div id="statusMessage"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="main.js"></script>
+</body>
+</html>
