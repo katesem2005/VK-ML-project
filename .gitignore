@@ -23,8 +23,5 @@ storage/
 uploads/
 results/
 
-# Модель (если не используете LFS, раскомментируйте следующую строку)
-frontend/model/
-
 # Журналы
 *.log
