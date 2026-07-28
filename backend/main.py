@@ -6,6 +6,15 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Dict
 import aiofiles
+from pathlib import Path
+from fastapi.staticfiles import StaticFiles
+
+# Определяем абсолютный путь к папке frontend (на уровень выше от backend)
+BASE_DIR = Path(__file__).resolve().parent.parent
+FRONTEND_DIR = BASE_DIR / "frontend"
+
+# Монтируем статику
+app.mount("/static", StaticFiles(directory=str(FRONTEND_DIR)), name="static")
 
 app = FastAPI()
 
