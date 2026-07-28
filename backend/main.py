@@ -2,19 +2,11 @@ import os
 import uuid
 from fastapi import FastAPI, UploadFile, File, HTTPException, Form
 from fastapi.responses import FileResponse, RedirectResponse
-from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Dict
 import aiofiles
 from pathlib import Path
 from fastapi.staticfiles import StaticFiles
-
-# Определяем абсолютный путь к папке frontend (на уровень выше от backend)
-BASE_DIR = Path(__file__).resolve().parent.parent
-FRONTEND_DIR = BASE_DIR / "frontend"
-
-# Монтируем статику
-app.mount("/static", StaticFiles(directory=str(FRONTEND_DIR)), name="static")
 
 app = FastAPI()
 
@@ -25,12 +17,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Определяем абсолютный путь к папке frontend (на уровень выше от backend)
+BASE_DIR = Path(__file__).resolve().parent.parent
+FRONTEND_DIR = BASE_DIR / "frontend"
+
+app.mount("/static", StaticFiles(directory=str(FRONTEND_DIR)), name="static")
+
+
 os.makedirs("storage/uploads", exist_ok=True)
 os.makedirs("storage/results", exist_ok=True)
 
 tasks: Dict[str, dict] = {}
-
-app.mount("/static", StaticFiles(directory="../frontend"), name="static")
 
 @app.get("/")
 async def root():
