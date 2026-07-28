@@ -1,15 +1,18 @@
 import os
 import uuid
-from fastapi import FastAPI, UploadFile, File, HTTPException, Form
-from fastapi.responses import FileResponse, RedirectResponse
-from fastapi.middleware.cors import CORSMiddleware
-from typing import Dict
-import aiofiles
 from pathlib import Path
+from typing import Dict
+
+import aiofiles
+from fastapi import FastAPI, UploadFile, File, HTTPException, Form
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
+# ----------------- 1. СОЗДАЁМ ПРИЛОЖЕНИЕ -----------------
 app = FastAPI()
 
+# ----------------- 2. НАСТРАИВАЕМ CORS -----------------
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -17,18 +20,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Определяем абсолютный путь к папке frontend (на уровень выше от backend)
+# ----------------- 3. МОНТИРУЕМ СТАТИКУ -----------------
 BASE_DIR = Path(__file__).resolve().parent.parent
 FRONTEND_DIR = BASE_DIR / "frontend"
 
 app.mount("/static", StaticFiles(directory=str(FRONTEND_DIR)), name="static")
 
-
-os.makedirs("storage/uploads", exist_ok=True)
-os.makedirs("storage/results", exist_ok=True)
-
+# ----------------- 4. ХРАНИЛИЩЕ ЗАДАЧ -----------------
 tasks: Dict[str, dict] = {}
 
+# ----------------- 5. ЭНДПОИНТЫ -----------------
 @app.get("/")
 async def root():
     return RedirectResponse(url="/static/index.html")
@@ -37,6 +38,7 @@ async def root():
 async def upload_image(file: UploadFile = File(...)):
     task_id = str(uuid.uuid4())
     file_path = f"storage/uploads/{task_id}.jpg"
+    os.makedirs("storage/uploads", exist_ok=True)
     async with aiofiles.open(file_path, "wb") as f:
         content = await file.read()
         await f.write(content)
@@ -62,7 +64,7 @@ async def update_progress(task_id: str, progress: int = Form(...)):
     if task_id not in tasks:
         raise HTTPException(status_code=404, detail="Task not found")
     tasks[task_id]["progress"] = progress
-    tasks[task_id]["status"] = "processing" if progress < 100 else "processing_done"
+    tasks[task_id]["status"] = "processing" if progress < 100 else "completed"
     return {"ok": True}
 
 @app.get("/api/status/{task_id}")
@@ -76,6 +78,7 @@ async def upload_result(task_id: str, file: UploadFile = File(...)):
     if task_id not in tasks:
         raise HTTPException(status_code=404, detail="Task not found")
     result_path = f"storage/results/{task_id}.jpg"
+    os.makedirs("storage/results", exist_ok=True)
     async with aiofiles.open(result_path, "wb") as f:
         content = await file.read()
         await f.write(content)
@@ -91,7 +94,3 @@ async def download_result(task_id: str):
     if not result_path or not os.path.exists(result_path):
         raise HTTPException(status_code=404, detail="Result not ready or not found")
     return FileResponse(result_path, filename=f"enhanced_{task_id}.jpg")
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
